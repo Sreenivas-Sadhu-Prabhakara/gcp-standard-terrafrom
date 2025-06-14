@@ -1,0 +1,132 @@
+@startuml Learning SaaS System
+
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FFFFFF
+skinparam handwritten false
+
+' Color definitions
+skinparam participant {
+    BackgroundColor #E1F5FE
+    BorderColor #0288D1
+}
+skinparam actor {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+}
+skinparam database {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+}
+skinparam sequence {
+    LifeLineBorderColor #BDBDBD
+    LifeLineBackgroundColor #FFFFFF
+}
+
+' Actor styling
+actor "Teacher" as Teacher #E8EAF6
+actor "Student" as Student #FFF3E0
+
+' System components
+participant "Auth System" as Auth #E1F5FE
+participant "Content Manager" as CM #E1F5FE
+participant "Question Engine" as QE #E1F5FE
+participant "Assessment System" as AS #E1F5FE
+database "Learning DB" as DB #E8F5E9
+
+note over Teacher: Teacher Flow
+skinparam ActorBackgroundColor #E8EAF6
+
+' Teacher Flow
+activate Teacher #INDIGO
+Teacher -> Auth: Login Request
+activate Auth #1A237E
+Auth --> Teacher: Authentication Response
+deactivate Auth
+
+Teacher -> CM: Upload PDFs
+activate CM #0D47A1
+CM -> DB: Store PDFs
+activate DB #1B5E20
+DB --> CM: Storage Confirmation
+deactivate DB
+CM --> Teacher: Upload Confirmation
+deactivate CM
+
+Teacher -> QE: Request Generated Questions
+activate QE #0D47A1
+QE -> DB: Generate Questions from PDFs
+activate DB #1B5E20
+DB --> QE: Return Generated Questions
+deactivate DB
+QE --> Teacher: Display Questions for Review
+
+loop For Each Question
+    Teacher -> QE: Review & Validate Question
+    activate DB #1B5E20
+    QE -> DB: Update Question Status
+    DB --> QE: Status Updated
+    deactivate DB
+end
+
+Teacher -> QE: Approve Questions for Testing
+activate DB #1B5E20
+QE -> DB: Mark Questions as Active
+DB --> QE: Confirmation
+deactivate DB
+deactivate QE
+deactivate Teacher
+
+note over Student: Student Flow
+skinparam ActorBackgroundColor #FFF3E0
+
+' Student Flow
+activate Student #F57C00
+Student -> Auth: Login Request
+activate Auth #E65100
+Auth --> Student: Authentication Response
+deactivate Auth
+
+Student -> CM: Request Available Topics
+activate CM #EF6C00
+CM -> DB: Fetch Accessible Topics
+activate DB #1B5E20
+DB --> CM: Return Topics
+deactivate DB
+CM --> Student: Display Topic List
+deactivate CM
+
+Student -> CM: Select Topic
+activate CM #EF6C00
+CM -> QE: Request Quiz
+activate QE #E65100
+QE -> DB: Fetch Approved Questions
+activate DB #1B5E20
+DB --> QE: Return Questions
+deactivate DB
+QE --> Student: Present Quiz
+deactivate QE
+deactivate CM
+
+Student -> AS: Submit Answers
+activate AS #EF6C00
+AS -> DB: Process Answers
+activate DB #1B5E20
+DB --> AS: Confirmation
+deactivate DB
+AS -> AS: Calculate Performance
+
+AS --> Student: Display Results & Feedback
+AS -> DB: Store Performance Data
+activate DB #1B5E20
+DB --> AS: Storage Confirmation
+deactivate DB
+AS --> Student: Show Weak Topics
+deactivate AS
+
+Student -> Auth: Logout
+activate Auth #E65100
+Auth --> Student: Logout Confirmation
+deactivate Auth
+deactivate Student
+
+@enduml
