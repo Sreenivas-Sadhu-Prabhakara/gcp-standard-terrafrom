@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Project ROI Calculator</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #27ae60;
+            --light: #ecf0f1;
+            --border: #bdc3c7;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        /* Grid for Inputs */
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 25px;
+            background-color: var(--light);
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        input {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+        
+        /* Summary Cards */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .card.main-result {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+        .card.profit {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+        .card h3 {
+            margin: 0;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        .card .value {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .card .subtext {
+            font-size: 0.75em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            margin-top: 10px;
+            background: white;
+        }
+        thead {
+            background-color: var(--primary);
+            color: white;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        th:first-child, td:first-child {
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        .split-header {
+            background-color: #34495e;
+            text-align: center;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+        tfoot {
+            font-weight: bold;
+            background-color: #ecf0f1;
+            border-top: 2px solid #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Solar ROI Calculator</h1>
+    <p class="subtitle">Modify the variables below to update the projection instantly.</p>
+
+    <div class="grid-inputs">
+        <div class="input-group">
+            <label>Panel Cost (₹)</label>
+            <input type="number" id="panelCost" value="400000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Battery Cost (₹)</label>
+            <input type="number" id="batteryCost" value="100000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Setup / Install Cost (₹)</label>
+            <input type="number" id="setupCost" value="0" placeholder="e.g. 50000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Input Value (Monthly Bill) (₹)</label>
+            <input type="number" id="inputValue" value="20000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Interest Rate (% PA)</label>
+            <input type="number" id="interestRate" value="24" step="0.1" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Duration (Years)</label>
+            <input type="number" id="years" value="5" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Installer Profit Share (%)</label>
+            <input type="number" id="installerShare" value="33" oninput="calculate()">
+        </div>
+    </div>
+
+    <div class="summary-section">
+        <div class="card main-result">
+            <h3>Total CapEx</h3>
+            <div class="value" id="dispTotalPrincipal">0</div>
+            <div class="subtext">Panels + Battery + Setup</div>
+        </div>
+        <div class="card main-result">
+            <h3>Monthly EMI</h3>
+            <div class="value" id="dispEMI">0</div>
+            <div class="subtext">Cost of Loan</div>
+        </div>
+        <div class="card profit">
+            <h3>Net Monthly Cashflow</h3>
+            <div class="value" id="dispNetMonthly">0</div>
+            <div class="subtext">Bill Input - EMI</div>
+        </div>
+    </div>
+    
+    <div class="summary-section">
+        <div class="card">
+            <h3>Installer Total</h3>
+            <div class="value" id="dispInstallerTotal">0</div>
+            <div class="subtext" id="lblInstallerShare">Share %</div>
+        </div>
+        <div class="card">
+            <h3>Commissioner Total</h3>
+            <div class="value" id="dispCommTotal">0</div>
+            <div class="subtext" id="lblCommShare">Share %</div>
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <h3>Detailed Month-on-Month Split</h3>
+    <div class="table-container">
+        <table id="scheduleTable">
+            <thead>
+                <tr>
+                    <th rowspan="2">Month</th>
+                    <th rowspan="2">Loan Balance</th>
+                    <th rowspan="2">EMI (Out)</th>
+                    <th rowspan="2">Bill (In)</th>
+                    <th rowspan="2" style="border-left: 2px solid white;">Net Profit</th>
+                    <th colspan="2" class="split-header">Profit Distribution</th>
+                </tr>
+                <tr>
+                    <th>Installer</th>
+                    <th>Commissioner</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+            <tfoot id="tableFooter">
+                </tfoot>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Utility to format numbers as Currency (INR)
+    function formatCurrency(num) {
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+    }
+
+    function calculate() {
+        // --- 1. FETCH VARIABLES ---
+        const panelCost = parseFloat(document.getElementById('panelCost').value) || 0;
+        const batteryCost = parseFloat(document.getElementById('batteryCost').value) || 0;
+        const setupCost = parseFloat(document.getElementById('setupCost').value) || 0;
+        const inputValue = parseFloat(document.getElementById('inputValue').value) || 0; // Monthly Bill
+        const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
+        const years = parseFloat(document.getElementById('years').value) || 0;
+        const installerSharePct = parseFloat(document.getElementById('installerShare').value) || 0;
+
+        // --- 2. CALCULATE ---
+        const totalPrincipal = panelCost + batteryCost + setupCost;
+        const months = years * 12;
+        const monthlyRate = (annualRate / 100) / 12;
+        const commSharePct = 100 - installerSharePct;
+
+        // Calculate EMI
+        let emi = 0;
+        if (totalPrincipal > 0) {
+            if (monthlyRate > 0) {
+                emi = (totalPrincipal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+            } else {
+                emi = totalPrincipal / months;
+            }
+        }
+
+        const monthlyNetProfit = inputValue - emi;
+        const monthlyInstallerShare = monthlyNetProfit * (installerSharePct / 100);
+        const monthlyCommShare = monthlyNetProfit * (commSharePct / 100);
+
+        // --- 3. UPDATE UI CARDS ---
+        document.getElementById('dispTotalPrincipal').innerText = formatCurrency(totalPrincipal);
+        document.getElementById('dispEMI').innerText = formatCurrency(emi);
+        document.getElementById('dispNetMonthly').innerText = formatCurrency(monthlyNetProfit);
+        
+        document.getElementById('dispInstallerTotal').innerText = formatCurrency(monthlyInstallerShare * months);
+        document.getElementById('dispCommTotal').innerText = formatCurrency(monthlyCommShare * months);
+        
+        document.getElementById('lblInstallerShare').innerText = `@ ${installerSharePct}% Share`;
+        document.getElementById('lblCommShare').innerText = `@ ${commSharePct}% Share`;
+
+        // --- 4. GENERATE TABLE ---
+        const tbody = document.querySelector('#scheduleTable tbody');
+        const tfoot = document.getElementById('tableFooter');
+        tbody.innerHTML = '';
+        tfoot.innerHTML = '';
+
+        let balance = totalPrincipal;
+        let totalEMI = 0;
+        let totalInput = 0;
+        let totalNet = 0;
+        let totalInst = 0;
+        let totalComm = 0;
+
+        for (let i = 1; i <= months; i++) {
+            // Interest logic
+            let interestPart = balance * monthlyRate;
+            let principalPart = emi - interestPart;
+            balance -= principalPart;
+            if (balance < 0) balance = 0;
+
+            // Totals
+            totalEMI += emi;
+            totalInput += inputValue;
+            totalNet += monthlyNetProfit;
+            totalInst += monthlyInstallerShare;
+            totalComm += monthlyCommShare;
+
+            // Create Row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i}</td>
+                <td style="color:#7f8c8d">${formatCurrency(balance + principalPart)}</td>
+                <td style="color:#c0392b">${formatCurrency(emi)}</td>
+                <td style="color:#27ae60">${formatCurrency(inputValue)}</td>
+                <td style="border-left: 1px solid #ddd; font-weight:bold;">${formatCurrency(monthlyNetProfit)}</td>
+                <td>${formatCurrency(monthlyInstallerShare)}</td>
+                <td>${formatCurrency(monthlyCommShare)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // Create Footer
+        tfoot.innerHTML = `
+            <tr>
+                <td colspan="2">TOTALS (End of Term)</td>
+                <td style="color:#c0392b">${formatCurrency(totalEMI)}</td>
+                <td style="color:#27ae60">${formatCurrency(totalInput)}</td>
+                <td style="border-left: 1px solid #bdc3c7;">${formatCurrency(totalNet)}</td>
+                <td>${formatCurrency(totalInst)}</td>
+                <td>${formatCurrency(totalComm)}</td>
+            </tr>
+        `;
+    }
+
+    // Initialize
+    window.onload = calculate;
+</script>
+
+</body>
+</html>

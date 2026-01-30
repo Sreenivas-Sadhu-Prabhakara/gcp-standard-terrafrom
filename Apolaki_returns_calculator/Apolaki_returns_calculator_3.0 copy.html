@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apolaki Solar Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* APOLAKI THEME PALETTE */
+            --bg-deep: #050505;
+            --bg-panel: #121212;
+            --gold-primary: #FFD700;
+            --gold-dim: #C5A000;
+            --text-white: #ffffff;
+            --text-grey: #b0b0b0;
+            --accent-red: #8B0000; /* War aspect */
+            --glass-border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-white);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Using a placeholder for the background, replace with your actual image */
+            background-image: linear-gradient(to bottom, rgba(5,5,5,0.9), rgba(5,5,5,0.95)), url('https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* --- HEADER & HERO --- */
+        header {
+            text-align: center;
+            padding: 30px 20px 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        /* New style for the embedded logo */
+        .logo-img {
+            max-width: 280px; /* Adjust size as needed */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); /* Add a subtle glow */
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-grey);
+            margin-top: 15px;
+        }
+
+        /* --- NAVIGATION TABS --- */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--gold-dim);
+            color: var(--gold-primary);
+            padding: 12px 25px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            font-size: 1rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            width: 150px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .tab-btn.active {
+            background: var(--gold-primary);
+            color: var(--bg-deep);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex-grow: 1;
+            overflow-y: auto; /* Scrollable content area */
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-section {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- PAGE 1: INPUTS (The Forge) --- */
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .input-card {
+            background: rgba(20, 20, 20, 0.85);
+            border: var(--glass-border);
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .input-card h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-primary);
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 20px; }
+        .control-group label {
+            display: block;
+            color: var(--text-grey);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="number"] {
+            background: #000;
+            border: 1px solid #333;
+            color: var(--gold-primary);
+            padding: 8px;
+            width: 100px;
+            text-align: right;
+            font-size: 1rem;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--gold-primary);
+        }
+
+        /* --- PAGE 2: DASHBOARD (The Oracle) --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        @media(max-width: 700px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .stat-box.highlight {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0,0,0,0));
+            border: 1px solid var(--gold-primary);
+            grid-column: 1 / -1; /* Full width */
+        }
+
+        .stat-label {
+            font-family: 'Cinzel', serif;
+            color: var(--text-grey);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            color: var(--text-white);
+            font-weight: 300;
+        }
+
+        .highlight .stat-value {
+            color: var(--gold-primary);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            font-weight: 700;
+        }
+
+        /* --- PAGE 3: SCHEDULE (The Chronicle) --- */
+        .table-container {
+            background: rgba(0,0,0,0.9);
+            border: var(--glass-border);
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 60vh;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: var(--gold-primary);
+            font-family: 'Cinzel', serif;
+            padding: 15px;
+            text-align: right;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--gold-dim);
+        }
+        th:first-child { text-align: left; }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #333;
+            text-align: right;
+            color: var(--text-grey);
+        }
+        td:first-child { text-align: left; color: var(--gold-primary); }
+
+        /* Helpers */
+        .text-green { color: #2ecc71; }
+        .text-red { color: #e74c3c; }
+        .text-gold { color: var(--gold-primary); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="image_1.png" alt="Apolaki Solar" class="logo-img">
+        <div class="subtitle">Solar Investment Estimator • Philippines</div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('inputs')">1. The Forge</button>
+        <button class="tab-btn" onclick="switchTab('dashboard')">2. The Oracle</button>
+        <button class="tab-btn" onclick="switchTab('schedule')">3. The Chronicle</button>
+    </nav>
+
+    <main>
+        <div id="inputs" class="page-section active">
+            <div class="input-grid">
+                
+                <div class="input-card">
+                    <h3>System Costs (₱)</h3>
+                    <div class="control-group">
+                        <label>Solar Panel Cost</label>
+                        <div class="slider-row">
+                            <input type="number" id="panelCost" value="400000" oninput="sync('panelCost', 'rngPanel')">
+                            <input type="range" id="rngPanel" min="0" max="1000000" step="5000" value="400000" oninput="sync('rngPanel', 'panelCost')">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Battery Storage Cost</label>
+                        <div class="slider-row">
+                            <input type="number" id="batCost" value="100000" oninput="sync('batCost', 'rngBat')">
+                            <input type="range" id="rngBat" min="0" max="500000" step="5000" value="100000" oninput="sync('rngBat', 'batCost')">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Installation / Setup</label>
+                        <div class="slider-row">
+                            <input type="number" id="setupCost" value="0" oninput="sync('setupCost', 'rngSetup')">
+                            <input type="range" id="rngSetup" min="0" max="200000" step="1000" value="0" oninput="sync('rngSetup', 'setupCost')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <h3>Financial Metrics</h3>
+                    <div class="control-group">
+                        <label>Monthly Bill Savings (Input Value)</label>
+                        <div class="slider-row">
+                            <input type="number" id="bill" value="20000" oninput="sync('bill', 'rngBill')">
+                            <input type="range" id="rngBill" min="1000" max="100000" step="500" value="20000" oninput="sync('rngBill', 'bill')">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Annual Interest Rate (%)</label>
+                        <div class="slider-row">
+                            <input type="number" id="rate" value="24" step="0.1" oninput="sync('rate', 'rngRate')">
+                            <input type="range" id="rngRate" min="0" max="40" step="0.5" value="24" oninput="sync('rngRate', 'rate')">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Loan Duration (Years)</label>
+                        <div class="slider-row">
+                            <input type="number" id="years" value="5" oninput="sync('years', 'rngYears')">
+                            <input type="range" id="rngYears" min="1" max="15" step="1" value="5" oninput="sync('rngYears', 'years')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <h3>Profit Distribution</h3>
+                    <div class="control-group">
+                        <label>Installer Share (%)</label>
+                        <div class="slider-row">
+                            <input type="number" id="share" value="33" oninput="sync('share', 'rngShare')">
+                            <input type="range" id="rngShare" min="0" max="100" step="1" value="33" oninput="sync('rngShare', 'share')">
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-grey); text-align:center;">
+                        Commissioner gets the remaining <span id="commDisplay" style="color:var(--gold-primary)">67%</span>
+                    </p>
+                </div>
+
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="tab-btn active" onclick="switchTab('dashboard')" style="width: 250px;">Calculate Results &rarr;</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="page-section">
+            <div class="dashboard-grid">
+                
+                <div class="stat-box highlight">
+                    <div class="stat-label">Net Monthly Cashflow</div>
+                    <div class="stat-value" id="valNetMonthly">₱0</div>
+                    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">(Monthly Savings - EMI)</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-label">Total CapEx</div>
+                    <div class="stat-value" id="valCapEx">₱0</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-label">Monthly EMI</div>
+                    <div class="stat-value text-red" id="valEMI">₱0</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-label">Installer Total Share</div>
+                    <div class="stat-value text-gold" id="valInstTotal">₱0</div>
+                    <small id="lblInstShare">@ 33%</small>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-label">Commissioner Total Share</div>
+                    <div class="stat-value text-gold" id="valCommTotal">₱0</div>
+                    <small id="lblCommShare">@ 67%</small>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="schedule" class="page-section">
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Mo.</th>
+                            <th>Loan Balance</th>
+                            <th>EMI (Out)</th>
+                            <th>Bill (In)</th>
+                            <th>Net Cashflow</th>
+                            <th>Installer</th>
+                            <th>Commissioner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. UTILITIES ---
+        const toPHP = (num) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(num);
+
+        function sync(source, target) {
+            document.getElementById(target).value = document.getElementById(source).value;
+            calculate();
+        }
+
+        function switchTab(tabId) {
+            // Update Buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const index = ['inputs','dashboard','schedule'].indexOf(tabId);
+            document.querySelectorAll('.tab-btn')[index].classList.add('active');
+
+            // Update Sections
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- 2. LOGIC ---
+        function calculate() {
+            // Fetch Inputs
+            const P_panel = parseFloat(document.getElementById('panelCost').value) || 0;
+            const P_bat = parseFloat(document.getElementById('batCost').value) || 0;
+            const P_setup = parseFloat(document.getElementById('setupCost').value) || 0;
+            const Bill = parseFloat(document.getElementById('bill').value) || 0;
+            const Rate = parseFloat(document.getElementById('rate').value) || 0;
+            const Years = parseFloat(document.getElementById('years').value) || 0;
+            const ShareInst = parseFloat(document.getElementById('share').value) || 0;
+
+            // Derived
+            const Principal = P_panel + P_bat + P_setup;
+            const Months = Years * 12;
+            const MonthlyRate = (Rate / 100) / 12;
+            const ShareComm = 100 - ShareInst;
+
+            document.getElementById('commDisplay').innerText = ShareComm + "%";
+
+            // EMI
+            let emi = 0;
+            if (Principal > 0) {
+                if (MonthlyRate > 0) {
+                    emi = (Principal * MonthlyRate * Math.pow(1 + MonthlyRate, Months)) / (Math.pow(1 + MonthlyRate, Months) - 1);
+                } else {
+                    emi = Principal / Months;
+                }
+            }
+
+            const NetMonthly = Bill - emi;
+            const InstMonth = NetMonthly * (ShareInst / 100);
+            const CommMonth = NetMonthly * (ShareComm / 100);
+
+            // Update Dashboard
+            document.getElementById('valCapEx').innerText = toPHP(Principal);
+            document.getElementById('valEMI').innerText = toPHP(emi);
+            document.getElementById('valNetMonthly').innerText = toPHP(NetMonthly);
+            
+            // Color logic for Net
+            const netEl = document.getElementById('valNetMonthly');
+            if(NetMonthly >= 0) {
+                netEl.className = "stat-value text-gold";
+                netEl.style.textShadow = "0 0 15px rgba(255, 215, 0, 0.5)";
+            } else {
+                netEl.className = "stat-value text-red";
+                netEl.style.textShadow = "none";
+            }
+
+            document.getElementById('valInstTotal').innerText = toPHP(InstMonth * Months);
+            document.getElementById('valCommTotal').innerText = toPHP(CommMonth * Months);
+            document.getElementById('lblInstShare').innerText = `@ ${ShareInst}% Share`;
+            document.getElementById('lblCommShare').innerText = `@ ${ShareComm}% Share`;
+
+            // Update Table
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+
+            let bal = Principal;
+
+            for(let i=1; i<=Months; i++) {
+                let interest = bal * MonthlyRate;
+                let principalPart = emi - interest;
+                bal -= principalPart;
+                if(bal < 0) bal = 0;
+
+                const row = `
+                    <tr>
+                        <td>${i}</td>
+                        <td style="color:#777">${toPHP(bal + principalPart)}</td>
+                        <td class="text-red">${toPHP(emi)}</td>
+                        <td class="text-green">${toPHP(Bill)}</td>
+                        <td class="${NetMonthly >= 0 ? 'text-gold' : 'text-red'}">${toPHP(NetMonthly)}</td>
+                        <td>${toPHP(InstMonth)}</td>
+                        <td>${toPHP(CommMonth)}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            }
+        }
+
+        // Init
+        window.onload = calculate;
+
+    </script>
+</body>
+</html>
