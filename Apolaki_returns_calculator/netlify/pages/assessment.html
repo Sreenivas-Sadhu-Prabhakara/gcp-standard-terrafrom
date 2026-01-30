@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <title>Assessment | Apolaki</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Enhanced Font Visibility */
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+        }
+        
+        /* HIGH CONTRAST TEXT OVERRIDES */
+        body {
+            color: #ffffff !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        p, span, label {
+            color: #e2e8f0 !important;
+        }
+        
+        .subtitle {
+            color: #cbd5e1 !important;
+        }
+        
+        /* Specific Styles for Map Integration */
+        .map-container {
+            height: 100%;
+            width: 100%;
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--border);
+        }
+
+        #solarMap {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Tab switcher for Input Methods */
+        .input-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            background: var(--bg-darker);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+        
+        .toggle-switch input:not(:checked) + .toggle-slider {
+            background-color: #22c55e;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .input-tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            top: 1px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .input-tab.active {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border-color: var(--border-color);
+            border-bottom: 1px solid var(--bg-card);
+            z-index: 2;
+        }
+
+        .input-tab:hover,
+        .input-tab:focus {
+            background: var(--bg-body);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .coordinates-display {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-darker, #0f172a);
+            color: var(--success, #22c55e);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .address-label {
+            font-weight: 600;
+            margin-top: 12px;
+            display: block;
+            color: var(--text-secondary, #cbd5e1);
+            font-size: 0.9rem;
+        }
+
+        .address-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border, #334155);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            margin-top: 6px;
+            background: var(--bg-card, #1e293b);
+            color: var(--text-primary, #f1f5f9);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .address-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .address-input::placeholder {
+            color: #64748b;
+        }
+
+        .address-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: var(--primary, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            width: 100%;
+        }
+
+        .address-btn:hover {
+            background: var(--primary-dark, #2563eb);
+            transform: translateY(-1px);
+        }
+
+        .address-btn:active {
+            transform: translateY(0);
+        }
+
+        .address-sample-tip {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        /* Console output styling */
+        .console-ui {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #22c55e;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .console-ui div {
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        /* Results grid styling */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .result-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-lbl {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .result-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .result-card small {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Button styles */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-primary:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #94a3b8;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header" role="banner">
+        <div class="header-inner">
+            <a href="../index.html" class="brand" aria-label="Apolaki Home">
+                <i class="fa-solid fa-sun fa-spin-pulse" style="--fa-animation-duration: 3s;" aria-hidden="true"></i> APOLAKI
+            </a>
+            <nav class="nav-pills" aria-label="Main Navigation">
+                <a href="../index.html" class="nav-pill"><i class="fa-solid fa-house" aria-hidden="true"></i> Home</a>
+                <a href="assessment.html" class="nav-pill active" aria-current="page"><i class="fa-solid fa-map" aria-hidden="true"></i> Assessment</a>
+                <a href="marketplace.html" class="nav-pill"><i class="fa-solid fa-shop" aria-hidden="true"></i> Marketplace</a>
+                <a href="finance.html" class="nav-pill"><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Finance</a>
+                <a href="contracts.html" class="nav-pill"><i class="fa-solid fa-file-contract" aria-hidden="true"></i> Contracts</a>
+                <a href="monitor.html" class="nav-pill"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Monitor</a>
+                <a href="credits.html" class="nav-pill"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Credits</a>
+                <a href="about.html" class="nav-pill"><i class="fa-solid fa-users" aria-hidden="true"></i> About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content" role="main">
+        <div class="app-card">
+
+            <div class="progress-track">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="wizard-step active" id="step1">
+                <div class="form-panel">
+                    <h1>Solar Potential Map</h1>
+                    <p class="subtitle">Locate your neighborhood using NASA & Google Earth data.</p>
+
+                    <!-- Mock Mode Toggle -->
+                    <div class="mock-toggle-container" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                        <span style="color: #94a3b8; font-size: 0.85rem;">Real API</span>
+                        <label class="toggle-switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                            <input type="checkbox" id="mockModeToggle" checked onchange="toggleMockMode()" style="opacity: 0; width: 0; height: 0;">
+                            <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3b82f6; transition: 0.3s; border-radius: 26px;"></span>
+                        </label>
+                        <span style="color: #60a5fa; font-size: 0.85rem; font-weight: 600;">Mock Data</span>
+                        <span id="mockModeStatus" style="font-size: 0.75rem; padding: 4px 8px; background: #3b82f6; color: white; border-radius: 4px;">ON</span>
+                    </div>
+                    <p id="mockModeDesc" style="text-align: center; font-size: 0.75rem; color: #64748b; margin-bottom: 16px;">
+                        Mock mode uses simulated data for testing. Disable for real NASA POWER API data.
+                    </p>
+
+                    <div class="input-tabs" role="tablist" aria-label="Location input methods">
+                        <button class="input-tab active" onclick="setInputMode('address')" role="tab" aria-selected="true" aria-controls="input-address" tabindex="0">Address Search</button>
+                        <button class="input-tab" onclick="setInputMode('zip')" role="tab" aria-selected="false" aria-controls="input-zip" tabindex="-1">Zip Code</button>
+                        <button class="input-tab" onclick="setInputMode('pin')" role="tab" aria-selected="false" aria-controls="input-pin" tabindex="-1">Pin on Map</button>
+                    </div>
+
+                    <div id="input-address" style="max-width:400px;margin:auto;">
+                        <form id="addressForm" onsubmit="event.preventDefault(); geocodeAddress();">
+                            <label class="address-label" for="inpStreet">Street Address</label>
+                            <input class="address-input" type="text" id="inpStreet" name="street"
+                                placeholder="e.g. 123 Ayala Ave" list="streetSamples" autocomplete="street-address" required>
+                            <datalist id="streetSamples">
+                                <option value="123 Ayala Ave">
+                                <option value="456 EDSA">
+                                <option value="789 Taft Ave">
+                            </datalist>
+
+                            <label class="address-label" for="inpCity">City/Municipality</label>
+                            <input class="address-input" type="text" id="inpCity" name="city" placeholder="e.g. Makati"
+                                list="citySamples" autocomplete="address-level2" required>
+                            <datalist id="citySamples">
+                                <option value="Makati">
+                                <option value="Quezon City">
+                                <option value="Pasig">
+                                <option value="Cebu City">
+                            </datalist>
+
+                            <label class="address-label" for="inpProvince">State/Province/Region</label>
+                            <input class="address-input" type="text" id="inpProvince" name="province"
+                                placeholder="e.g. California, Metro Manila, Ontario" list="provinceSamples" autocomplete="address-level1" required>
+                            <datalist id="provinceSamples">
+                                <option value="Metro Manila">
+                                <option value="California">
+                                <option value="Texas">
+                                <option value="Ontario">
+                                <option value="New South Wales">
+                            </datalist>
+
+                            <label class="address-label" for="inpCountry">Country</label>
+                            <input class="address-input" type="text" id="inpCountry" name="country"
+                                placeholder="e.g. USA, Philippines, Canada" list="countrySamples" autocomplete="country-name" required>
+                            <datalist id="countrySamples">
+                                <option value="Philippines">
+                                <option value="USA">
+                                <option value="Canada">
+                                <option value="Australia">
+                                <option value="United Kingdom">
+                                <option value="Germany">
+                                <option value="India">
+                                <option value="Japan">
+                            </datalist>
+
+                            <label class="address-label" for="inpZip">Postal/Zip Code <span
+                                    style="color:#888;font-size:0.9em;">(optional)</span></label>
+                            <input class="address-input" type="text" id="inpZip" name="zip" placeholder="e.g. 1226, 90210, SW1A 1AA"
+                                list="zipSamples" autocomplete="postal-code">
+                            <datalist id="zipSamples">
+                                <option value="1226">
+                                <option value="90210">
+                                <option value="10001">
+                                <option value="SW1A 1AA">
+                                <option value="M5V 3A8">
+                            </datalist>
+
+                            <button type="submit" class="address-btn">Find</button>
+                            <div class="address-sample-tip">
+                                <strong>Samples:</strong> 123 Main St, Los Angeles, California, USA &bull; 456 Ayala Ave, Makati, Metro Manila, Philippines
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="input-zip" style="display:none; max-width:400px; margin:auto;">
+                        <label for="inpZipCode" class="address-label">Postal/Zip Code</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="inpZipCode" class="address-input" placeholder="e.g. 90210, 1200, SW1A 1AA" style="flex:1;">
+                            <button class="btn btn-primary" onclick="geocodeZip()" aria-label="Search Postal Code"><i
+                                    class="fa-solid fa-search" aria-hidden="true"></i></button>
+                        </div>
+                        <p style="font-size:0.8rem; color:#94a3b8; margin-top:8px;">Enter any global postal/zip code to find that location</p>
+                    </div>
+
+                    <div id="input-pin" style="display:none; max-width:400px; margin:auto; text-align:center; padding:20px;">
+                        <div style="font-size:3rem; margin-bottom:10px;">📍</div>
+                        <p style="font-size:1rem; color:#60a5fa; margin-bottom:10px;">
+                            <i class="fa-solid fa-computer-mouse"></i> Click anywhere on the map to drop a pin
+                        </p>
+                        <p style="font-size:0.85rem; color:#94a3b8;">
+                            You can zoom in/out and drag the map to find your exact location
+                        </p>
+                    </div>
+
+                    <div id="coordsDisplay" class="coordinates-display">
+                        <i class="fa-solid fa-satellite-dish"></i> LAT: <span id="valLat">--</span> | LON: <span
+                            id="valLon">--</span>
+                    </div>
+
+                    <div id="locationStatus" style="margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); display: block;">
+                        <i class="fa-solid fa-info-circle" style="color: #fbbf24;"></i>
+                        <span style="color: #fbbf24; font-size: 0.9rem;"> Please select a location using one of the methods above, then click "Analyze Solar Potential"</span>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn btn-ghost" disabled>Back</button>
+                        <button class="btn btn-primary" id="btnAnalyze" disabled onclick="runSolarAnalysis()" aria-label="Analyze Solar Potential">
+                            Analyze Solar Potential <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="illustration-panel" style="padding:0;">
+                    <div class="map-container">
+                        <div id="solarMap"></div>
+                        <div
+                            style="position:absolute; bottom:20px; right:20px; background:white; padding:10px; border-radius:8px; z-index:999; font-size:0.75rem; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                            <strong>Irradiance Heatmap</strong><br>
+                            <span style="color:#F59E0B">●</span> High Potential<br>
+                            <span style="color:#3B82F6">●</span> Low Potential
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-step" id="step2">
+                <div class="form-panel" style="flex:2;">
+                    <h1>Querying Satellite Data...</h1>
+                    <p class="subtitle">Connecting to NASA POWER and Google Solar APIs.</p>
+                    <div class="console-ui" id="consoleOutput"></div>
+                </div>
+            </div>
+
+            <div class="wizard-step" id="step3">
+                <div class="form-panel" style="flex:2; align-items:center; text-align:center;">
+                    <div style="max-width:900px;">
+                        <h1>🌞 Solar Assessment Report</h1>
+                        <p class="subtitle">Based on location <strong id="resLoc"
+                                style="color:var(--color-primary)">...</strong></p>
+                        
+                        <!-- Location Details Card -->
+                        <div class="location-details-card" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: left; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <h3 style="color: #60a5fa; margin-bottom: 12px; font-size: 1.1rem;"><i class="fa-solid fa-location-dot"></i> Location Details</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <div><span style="color: #94a3b8;">Region:</span> <strong id="resRegion" style="color: #e2e8f0;">--</strong></div>
+                                <div><span style="color: #94a3b8;">Climate Zone:</span> <strong id="resClimate" style="color: #e2e8f0;">--</strong></div>
+                                <div><span style="color: #94a3b8;">Hemisphere:</span> <strong id="resHemisphere" style="color: #e2e8f0;">--</strong></div>
+                                <div><span style="color: #94a3b8;">Optimal Panel Tilt:</span> <strong id="resOptimalTilt" style="color: #e2e8f0;">--</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Main Results Grid -->
+                        <div class="results-grid">
+                            <div class="result-card">
+                                <div class="result-lbl">☀️ Peak Sun Hours</div>
+                                <div class="result-val" id="resSunHours">0 hrs/day</div>
+                                <small>Average daily equivalent full-sun hours</small>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-lbl">📊 Solar Irradiance</div>
+                                <div class="result-val" id="resIrradiance">0 kWh/m²/day</div>
+                                <small>Global Horizontal Irradiance (GHI)</small>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-lbl">🏠 Viable Roof Area</div>
+                                <div class="result-val" id="resRoof">0 sqm</div>
+                                <small>Estimated usable area for panels</small>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-lbl">⚡ Daily Generation</div>
+                                <div class="result-val" style="color:#22c55e" id="resDailyOutput">0 kWh/day</div>
+                                <small>Estimated daily energy production</small>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-lbl">🔋 Annual Output</div>
+                                <div class="result-val" style="color:#F59E0B" id="resOutput">0 MWh/yr</div>
+                                <small>Est. yearly generation</small>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-lbl">🌡️ Temp Efficiency</div>
+                                <div class="result-val" id="resTempEffect">0%</div>
+                                <small>Temperature impact on panels</small>
+                            </div>
+                        </div>
+
+                        <!-- Sunlight Breakdown -->
+                        <div class="sunlight-breakdown" style="background: #1e293b; border-radius: 16px; padding: 20px; margin-top: 24px; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2);">
+                            <h3 style="color: #fbbf24; margin-bottom: 16px; font-size: 1.1rem;"><i class="fa-solid fa-sun"></i> Sunlight Analysis</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                                <div style="background: #0f172a; padding: 14px; border-radius: 10px;">
+                                    <div style="color: #94a3b8; font-size: 0.85rem;">Sunrise (avg)</div>
+                                    <div style="color: #fbbf24; font-size: 1.3rem; font-weight: 700;" id="resSunrise">--</div>
+                                </div>
+                                <div style="background: #0f172a; padding: 14px; border-radius: 10px;">
+                                    <div style="color: #94a3b8; font-size: 0.85rem;">Sunset (avg)</div>
+                                    <div style="color: #f97316; font-size: 1.3rem; font-weight: 700;" id="resSunset">--</div>
+                                </div>
+                                <div style="background: #0f172a; padding: 14px; border-radius: 10px;">
+                                    <div style="color: #94a3b8; font-size: 0.85rem;">Daylight Hours</div>
+                                    <div style="color: #38bdf8; font-size: 1.3rem; font-weight: 700;" id="resDaylight">--</div>
+                                </div>
+                                <div style="background: #0f172a; padding: 14px; border-radius: 10px;">
+                                    <div style="color: #94a3b8; font-size: 0.85rem;">Clear Sky Days/Year</div>
+                                    <div style="color: #22c55e; font-size: 1.3rem; font-weight: 700;" id="resClearDays">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Generation Chart Placeholder -->
+                        <div class="monthly-chart" style="background: #1e293b; border-radius: 16px; padding: 20px; margin-top: 24px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                            <h3 style="color: #60a5fa; margin-bottom: 16px; font-size: 1.1rem;"><i class="fa-solid fa-chart-bar"></i> Monthly Generation Estimate</h3>
+                            <div id="monthlyBars" style="display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 4px; padding: 0 10px;"></div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #94a3b8; margin-top: 8px; padding: 0 10px;">
+                                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                                <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+                            </div>
+                        </div>
+
+                        <!-- Energy Equivalents -->
+                        <div class="energy-equivalents" style="background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%); border-radius: 16px; padding: 20px; margin-top: 24px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <h3 style="color: #4ade80; margin-bottom: 16px; font-size: 1.1rem;"><i class="fa-solid fa-leaf"></i> What Your Solar Could Power</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; text-align: center;">
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
+                                    <div style="font-size: 2rem;">🏠</div>
+                                    <div style="color: #e2e8f0; font-weight: 600;" id="resHomesEquiv">--</div>
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">Avg homes powered</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
+                                    <div style="font-size: 2rem;">🚗</div>
+                                    <div style="color: #e2e8f0; font-weight: 600;" id="resEVMiles">--</div>
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">EV miles/year</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
+                                    <div style="font-size: 2rem;">🌳</div>
+                                    <div style="color: #e2e8f0; font-weight: 600;" id="resTreesEquiv">--</div>
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">Trees equivalent</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
+                                    <div style="font-size: 2rem;">💨</div>
+                                    <div style="color: #e2e8f0; font-weight: 600;" id="resCO2Saved">--</div>
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">kg CO₂ saved/year</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-row" style="justify-content:center; gap:20px; margin-top: 30px;">
+                            <button class="btn btn-ghost" onclick="location.reload()">New Search</button>
+                            <a href="marketplace.html" class="btn btn-primary">Find Installers</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battery Storage Section -->
+            <div class="app-section" id="battery-storage-section" style="max-width:400px;margin:auto;margin-top:2rem;">
+                <h3>Battery Storage</h3>
+                <label for="batteryCapacity" class="address-label">Battery Capacity (kWh)</label>
+                <input class="address-input" type="number" id="batteryCapacity" min="0" step="0.1" placeholder="e.g. 5">
+                <label for="batteryType" class="address-label">Battery Type</label>
+                <select class="address-input" id="batteryType">
+                    <option value="lithium">Lithium-ion</option>
+                    <option value="lead">Lead-acid</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <!-- Appliance Utilization Section -->
+            <div class="app-section" id="appliance-utilization-section" style="max-width:400px;margin:auto;margin-top:2rem;">
+                <h3>Appliance Utilization</h3>
+                <table style="width:100%;margin-bottom:1rem;">
+                    <thead>
+                        <tr>
+                            <th>Appliance</th>
+                            <th>Wattage (W)</th>
+                            <th>Hours/Day</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applianceTable">
+                        <tr>
+                            <td><input type="text" value="Refrigerator" class="address-input"></td>
+                            <td><input type="number" value="150" class="address-input" style="width:80px;"></td>
+                            <td><input type="number" value="24" class="address-input" style="width:80px;"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" value="LED TV" class="address-input"></td>
+                            <td><input type="number" value="80" class="address-input" style="width:80px;"></td>
+                            <td><input type="number" value="4" class="address-input" style="width:80px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="address-btn" style="background:#f1f5f9;color:#0ea5e9;" onclick="addApplianceRow()">Add Appliance</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        let MOCK_MODE = true; // Toggle via UI switch
+        const GOOGLE_API_KEY = "YOUR_GOOGLE_KEY_HERE";
+
+        // Toggle Mock Mode function
+        function toggleMockMode() {
+            const toggle = document.getElementById('mockModeToggle');
+            const statusBadge = document.getElementById('mockModeStatus');
+            const desc = document.getElementById('mockModeDesc');
+            
+            MOCK_MODE = toggle.checked;
+            
+            if (MOCK_MODE) {
+                statusBadge.textContent = 'ON';
+                statusBadge.style.background = '#3b82f6';
+                desc.textContent = 'Mock mode uses simulated data for testing. Disable for real NASA POWER API data.';
+            } else {
+                statusBadge.textContent = 'OFF';
+                statusBadge.style.background = '#22c55e';
+                desc.textContent = '✓ Real API mode enabled. Will fetch live data from NASA POWER API.';
+            }
+        }
+
+        // State
+        let map, marker;
+        let selectedLat = null, selectedLon = null;
+
+        // --- 2. MAP INITIALIZATION (Leaflet) ---
+        window.onload = function () {
+            try {
+                // Default to world view, then try to get user location
+                map = L.map('solarMap').setView([20, 0], 2);
+
+                // Add OpenStreetMap Tile Layer (Free, no key needed for prototype)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Map Click Event
+                map.on('click', function (e) {
+                    setPin(e.latlng.lat, e.latlng.lng);
+                });
+
+                // Try to get user's current location
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            map.setView([lat, lon], 13);
+                        },
+                        function(error) {
+                            // Default to Philippines if geolocation fails
+                            map.setView([14.5995, 120.9842], 6);
+                        },
+                        { timeout: 5000 }
+                    );
+                } else {
+                    // Default to Philippines view
+                    map.setView([14.5995, 120.9842], 6);
+                }
+            } catch (error) {
+                console.error("Map initialization error:", error);
+                alert("Error loading map. Please refresh the page.");
+            }
+        }
+
+        // --- 3. INPUT HANDLING ---
+
+        // --- 4. GEOCODING (Address/Zip -> Lat/Lon) - GLOBAL SUPPORT ---
+        async function geocodeAddress() {
+            const street = document.getElementById('inpStreet').value.trim();
+            const city = document.getElementById('inpCity').value.trim();
+            const province = document.getElementById('inpProvince').value.trim();
+            const country = document.getElementById('inpCountry').value.trim();
+            const zip = document.getElementById('inpZip').value.trim();
+
+            if (!street || !city || !province || !country) {
+                alert("Please fill in street, city, state/province, and country.");
+                return;
+            }
+
+            // Build the address string (global)
+            let query = `${street}, ${city}, ${province}, ${country}`;
+            if (zip) query = `${street}, ${city}, ${province}, ${zip}, ${country}`;
+
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    setPin(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                    map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 16);
+                    return;
+                }
+                
+                // Fallback: try without postal code
+                const fallbackQuery = `${street}, ${city}, ${province}, ${country}`;
+                const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}&limit=1`;
+                const fallbackRes = await fetch(fallbackUrl);
+                const fallbackData = await fallbackRes.json();
+                if (fallbackData && fallbackData.length > 0) {
+                    setPin(parseFloat(fallbackData[0].lat), parseFloat(fallbackData[0].lon));
+                    map.setView([parseFloat(fallbackData[0].lat), parseFloat(fallbackData[0].lon)], 16);
+                    return;
+                }
+                
+                // Second fallback: try just city and country
+                const simpleQuery = `${city}, ${country}`;
+                const simpleUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(simpleQuery)}&limit=1`;
+                const simpleRes = await fetch(simpleUrl);
+                const simpleData = await simpleRes.json();
+                if (simpleData && simpleData.length > 0) {
+                    setPin(parseFloat(simpleData[0].lat), parseFloat(simpleData[0].lon));
+                    map.setView([parseFloat(simpleData[0].lat), parseFloat(simpleData[0].lon)], 14);
+                    alert("Exact address not found. Showing approximate location for the city.");
+                    return;
+                }
+                
+                alert("Location not found. Please check the address and try again, or use 'Pin on Map' to select your location manually.");
+            } catch (error) {
+                console.error("Geocoding error:", error);
+                alert("Error searching for address. Please try again or use 'Pin on Map' instead.");
+            }
+        }
+
+        async function geocodeZip() {
+            const zipInput = document.getElementById('inpZipCode');
+            const query = zipInput ? zipInput.value.trim() : '';
+            if (!query) {
+                alert("Please enter a Postal/Zip Code");
+                return;
+            }
+            // Global postal code search (no country restriction)
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${encodeURIComponent(query)}&limit=5`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    setPin(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                    map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 14);
+                } else {
+                    alert("Postal/Zip code not found. Try entering the full address instead.");
+                }
+            } catch (error) {
+                console.error("Geocoding error:", error);
+                alert("Error searching for postal code. Please try again.");
+            }
+        }
+
+        // --- 5. THE SOLAR ENGINE (API INTEGRATION) ---
+        function changeStep(step) {
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById('progressBar').style.width = (step / 3) * 100 + "%";
+        }
+
+        async function runSolarAnalysis() {
+            // Guard: Ensure location is selected
+            if (selectedLat === null || selectedLon === null) {
+                alert("Please select a location first by clicking on the map, entering an address, or using a postal code.");
+                return;
+            }
+            
+            changeStep(2);
+            const consoleDiv = document.getElementById('consoleOutput');
+            consoleDiv.innerHTML = ''; // Clear previous output
+            const log = (msg) => { consoleDiv.innerHTML += `<div>> ${msg}</div>`; consoleDiv.scrollTop = consoleDiv.scrollHeight; };
+
+            // 5a. Call NASA POWER API (Meteorology)
+            log(`Connecting to NASA POWER API for (${selectedLat.toFixed(2)}, ${selectedLon.toFixed(2)})...`);
+
+            let avgIrradiance = 0;
+            let monthlyIrradiance = [];
+            let avgTemp = 25; // Default temperature in Celsius
+            let clearSkyDays = 200;
+
+            if (MOCK_MODE) {
+                await new Promise(r => setTimeout(r, 1000));
+                // Location-aware mock data based on latitude
+                const latAbs = Math.abs(selectedLat);
+                if (latAbs < 23.5) { // Tropical
+                    avgIrradiance = 5.2 + (Math.random() * 0.5);
+                    avgTemp = 28;
+                    clearSkyDays = 250;
+                    monthlyIrradiance = [5.0, 5.3, 5.5, 5.4, 5.1, 4.8, 4.7, 4.9, 5.0, 5.2, 5.1, 4.9];
+                } else if (latAbs < 35) { // Subtropical
+                    avgIrradiance = 4.8 + (Math.random() * 0.4);
+                    avgTemp = 22;
+                    clearSkyDays = 220;
+                    monthlyIrradiance = [3.5, 4.2, 5.0, 5.5, 5.8, 6.0, 6.1, 5.8, 5.2, 4.5, 3.8, 3.3];
+                } else if (latAbs < 50) { // Temperate
+                    avgIrradiance = 3.8 + (Math.random() * 0.4);
+                    avgTemp = 15;
+                    clearSkyDays = 180;
+                    monthlyIrradiance = [1.5, 2.3, 3.5, 4.5, 5.2, 5.5, 5.3, 4.8, 3.8, 2.5, 1.8, 1.3];
+                } else { // High latitude
+                    avgIrradiance = 2.8 + (Math.random() * 0.3);
+                    avgTemp = 8;
+                    clearSkyDays = 150;
+                    monthlyIrradiance = [0.5, 1.2, 2.5, 4.0, 5.0, 5.5, 5.2, 4.2, 2.8, 1.5, 0.8, 0.4];
+                }
+                log("[NASA] Success: Historical Irradiance Data retrieved.");
+                log(`[NASA] Avg Daily Insolation: ${avgIrradiance.toFixed(2)} kWh/m²/day`);
+            } else {
+                try {
+                    // Real NASA API Call with multiple parameters
+                    const nasaUrl = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN,T2M,CLRSKY_DAYS&community=RE&longitude=${selectedLon}&latitude=${selectedLat}&format=JSON`;
+                    const nasaRes = await fetch(nasaUrl);
+                    const nasaData = await nasaRes.json();
+
+                    avgIrradiance = nasaData.properties.parameter.ALLSKY_SFC_SW_DWN.ANN;
+                    avgTemp = nasaData.properties.parameter.T2M?.ANN || 25;
+                    
+                    // Get monthly data
+                    const monthlyData = nasaData.properties.parameter.ALLSKY_SFC_SW_DWN;
+                    monthlyIrradiance = [
+                        monthlyData.JAN, monthlyData.FEB, monthlyData.MAR, monthlyData.APR,
+                        monthlyData.MAY, monthlyData.JUN, monthlyData.JUL, monthlyData.AUG,
+                        monthlyData.SEP, monthlyData.OCT, monthlyData.NOV, monthlyData.DEC
+                    ];
+                    
+                    log("[NASA] Data retrieved successfully.");
+                } catch (e) {
+                    log("[ERROR] NASA API failed, using location-based estimates.");
+                    avgIrradiance = 4.5;
+                    monthlyIrradiance = [4.0, 4.2, 4.5, 4.8, 5.0, 5.2, 5.0, 4.8, 4.5, 4.2, 4.0, 3.8];
+                }
+            }
+
+            // 5b. Call Google Solar API (Geometry)
+            log("Querying Google Solar API for building geometry...");
+
+            let roofArea = 0;
+            let maxPanels = 0;
+
+            if (MOCK_MODE) {
+                await new Promise(r => setTimeout(r, 1200));
+                roofArea = 50 + Math.floor(Math.random() * 50); // 50-100 sqm
+                maxPanels = Math.floor(roofArea / 2);
+                log("[Google Solar] Building footprint identified.");
+                log("[Google Solar] Pitch and Azimuth calculated.");
+                log("[Google Solar] Shading analysis complete (Yearly flux).");
+            } else {
+                // Real Google Solar Call (requires billing enabled)
+                roofArea = 65; // Default estimate
+                maxPanels = 24;
+            }
+
+            // 5c. Calculate Location-Specific Details
+            log("Calculating location-specific solar metrics...");
+            
+            // Determine hemisphere and optimal tilt
+            const hemisphere = selectedLat >= 0 ? "Northern" : "Southern";
+            const optimalTilt = Math.abs(selectedLat) * 0.87 + 3.1; // Rule of thumb formula
+            
+            // Determine climate zone
+            let climateZone = "";
+            const latAbs = Math.abs(selectedLat);
+            if (latAbs < 23.5) climateZone = "Tropical";
+            else if (latAbs < 35) climateZone = "Subtropical";
+            else if (latAbs < 50) climateZone = "Temperate";
+            else if (latAbs < 66.5) climateZone = "Subarctic/Subantarctic";
+            else climateZone = "Polar";
+            
+            // Estimate region based on coordinates (simplified)
+            let region = getRegionName(selectedLat, selectedLon);
+            
+            // Calculate daylight hours (approximate based on latitude and time of year)
+            const avgDaylightHours = calculateAvgDaylight(selectedLat);
+            
+            // Estimate sunrise/sunset (approximate annual averages)
+            const sunriseTime = (6 + (latAbs / 30)).toFixed(0).padStart(2, '0') + ":00";
+            const sunsetTime = (18 + (12 - avgDaylightHours) / 2).toFixed(0).padStart(2, '0') + ":00";
+            
+            // Peak sun hours (PSH) - different from daylight hours
+            const peakSunHours = avgIrradiance; // PSH ≈ daily irradiance in kWh/m²
+            
+            // Temperature efficiency loss (panels lose ~0.4% efficiency per °C above 25°C)
+            const tempCoeff = -0.004;
+            const stcTemp = 25;
+            const cellTempAdder = 25; // Cell temp is typically 25°C above ambient under operation
+            const effectiveCellTemp = avgTemp + cellTempAdder;
+            const tempEfficiencyLoss = (effectiveCellTemp - stcTemp) * tempCoeff * 100;
+            const tempEfficiency = 100 + tempEfficiencyLoss;
+
+            // 5d. Calculate Energy Output
+            log("Compiling final report...");
+            
+            // Panel efficiency and system parameters
+            const panelEfficiency = 0.20; // 20% modern panels
+            const systemLosses = 0.85; // Inverter, wiring, soiling losses
+            const tempFactor = tempEfficiency / 100;
+            
+            // Daily and annual generation
+            const dailyGenerationKWh = avgIrradiance * roofArea * panelEfficiency * systemLosses * tempFactor;
+            const annualGenerationKWh = dailyGenerationKWh * 365;
+            const annualGenerationMWh = annualGenerationKWh / 1000;
+            
+            // Monthly generation estimates
+            const monthlyGeneration = monthlyIrradiance.map(irr => 
+                (irr * roofArea * panelEfficiency * systemLosses * tempFactor * 30) // kWh per month
+            );
+            
+            // Environmental impact calculations
+            const co2PerKWh = 0.42; // kg CO2 per kWh (global average grid)
+            const co2Saved = annualGenerationKWh * co2PerKWh;
+            const treesEquivalent = Math.round(co2Saved / 21); // Each tree absorbs ~21kg CO2/year
+            const homesEquivalent = (annualGenerationKWh / 10500).toFixed(1); // US avg home uses 10,500 kWh/year
+            const evMiles = Math.round(annualGenerationKWh * 3.5); // ~3.5 miles per kWh for EVs
+
+            setTimeout(() => {
+                // Update DOM with all results
+                document.getElementById('resLoc').innerText = `${selectedLat.toFixed(4)}°, ${selectedLon.toFixed(4)}°`;
+                
+                // Location details
+                document.getElementById('resRegion').innerText = region;
+                document.getElementById('resClimate').innerText = climateZone;
+                document.getElementById('resHemisphere').innerText = hemisphere;
+                document.getElementById('resOptimalTilt').innerText = optimalTilt.toFixed(0) + "° from horizontal";
+                
+                // Main results
+                document.getElementById('resSunHours').innerText = peakSunHours.toFixed(1) + " hrs/day";
+                document.getElementById('resIrradiance').innerText = avgIrradiance.toFixed(2) + " kWh/m²/day";
+                document.getElementById('resRoof').innerText = roofArea + " sqm";
+                document.getElementById('resDailyOutput').innerText = dailyGenerationKWh.toFixed(1) + " kWh/day";
+                document.getElementById('resOutput').innerText = annualGenerationMWh.toFixed(2) + " MWh/yr";
+                document.getElementById('resTempEffect').innerText = tempEfficiency.toFixed(1) + "%";
+                
+                // Sunlight analysis
+                document.getElementById('resSunrise').innerText = sunriseTime + " AM";
+                document.getElementById('resSunset').innerText = sunsetTime.replace(/^0/, '') + " PM";
+                document.getElementById('resDaylight').innerText = avgDaylightHours.toFixed(1) + " hrs";
+                document.getElementById('resClearDays').innerText = clearSkyDays + " days";
+                
+                // Environmental equivalents
+                document.getElementById('resHomesEquiv').innerText = homesEquivalent;
+                document.getElementById('resEVMiles').innerText = evMiles.toLocaleString();
+                document.getElementById('resTreesEquiv').innerText = treesEquivalent;
+                document.getElementById('resCO2Saved').innerText = Math.round(co2Saved).toLocaleString();
+                
+                // Render monthly chart
+                renderMonthlyChart(monthlyGeneration);
+
+                changeStep(3);
+            }, 1000);
+        }
+        
+        // Helper function to get region name from coordinates
+        function getRegionName(lat, lon) {
+            // Simplified region detection
+            if (lat >= 5 && lat <= 20 && lon >= 117 && lon <= 127) return "Philippines";
+            if (lat >= 25 && lat <= 50 && lon >= -125 && lon <= -66) return "United States";
+            if (lat >= 49 && lat <= 60 && lon >= -130 && lon <= -60) return "Canada";
+            if (lat >= -44 && lat <= -10 && lon >= 113 && lon <= 154) return "Australia";
+            if (lat >= 50 && lat <= 60 && lon >= -8 && lon <= 2) return "United Kingdom";
+            if (lat >= 47 && lat <= 55 && lon >= 6 && lon <= 15) return "Germany";
+            if (lat >= 8 && lat <= 35 && lon >= 68 && lon <= 97) return "India";
+            if (lat >= 31 && lat <= 45 && lon >= 129 && lon <= 145) return "Japan";
+            if (lat >= 36 && lat <= 43 && lon >= -9 && lon <= 3) return "Spain";
+            if (lat >= 42 && lat <= 51 && lon >= -5 && lon <= 8) return "France";
+            if (lat >= 36 && lat <= 47 && lon >= 7 && lon <= 18) return "Italy";
+            if (lat >= -35 && lat <= -22 && lon >= -70 && lon <= -35) return "Brazil";
+            if (lat >= 18 && lat <= 32 && lon >= -118 && lon <= -86) return "Mexico";
+            if (lat >= 22 && lat <= 41 && lon >= 100 && lon <= 122) return "China";
+            if (lat >= 33 && lat <= 38 && lon >= 125 && lon <= 130) return "South Korea";
+            
+            // Default based on continent approximation
+            if (lon >= -170 && lon <= -30) return "Americas";
+            if (lon >= -30 && lon <= 60) return "Europe/Africa";
+            if (lon >= 60 && lon <= 180) return "Asia/Oceania";
+            return "International";
+        }
+        
+        // Calculate average daylight hours based on latitude
+        function calculateAvgDaylight(lat) {
+            const latRad = Math.abs(lat) * Math.PI / 180;
+            // Approximate formula for annual average daylight
+            // At equator: 12 hrs, decreases/increases with latitude
+            const avgDaylight = 12 + 0.5 * Math.sin(latRad);
+            return Math.min(Math.max(avgDaylight, 8), 16); // Clamp between 8-16 hours
+        }
+        
+        // Render monthly generation bar chart
+        function renderMonthlyChart(monthlyGen) {
+            const container = document.getElementById('monthlyBars');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const maxGen = Math.max(...monthlyGen);
+            
+            monthlyGen.forEach((gen, i) => {
+                const height = (gen / maxGen) * 100;
+                const bar = document.createElement('div');
+                bar.style.cssText = `
+                    width: 100%;
+                    height: ${height}%;
+                    background: linear-gradient(to top, #3b82f6, #60a5fa);
+                    border-radius: 4px 4px 0 0;
+                    position: relative;
+                    min-height: 5px;
+                    transition: all 0.3s ease;
+                `;
+                bar.title = `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}: ${gen.toFixed(0)} kWh`;
+                bar.onmouseover = () => bar.style.background = 'linear-gradient(to top, #f59e0b, #fbbf24)';
+                bar.onmouseout = () => bar.style.background = 'linear-gradient(to top, #3b82f6, #60a5fa)';
+                container.appendChild(bar);
+            });
+        }
+
+        function setInputMode(mode) {
+            document.querySelectorAll('.input-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('input-address').style.display = 'none';
+            document.getElementById('input-zip').style.display = 'none';
+            document.getElementById('input-pin').style.display = 'none';
+
+            if (mode === 'address') {
+                document.querySelectorAll('.input-tab')[0].classList.add('active');
+                document.getElementById('input-address').style.display = '';
+            } else if (mode === 'zip') {
+                document.querySelectorAll('.input-tab')[1].classList.add('active');
+                document.getElementById('input-zip').style.display = '';
+            } else if (mode === 'pin') {
+                document.querySelectorAll('.input-tab')[2].classList.add('active');
+                document.getElementById('input-pin').style.display = '';
+            }
+        }
+
+        // --- 6. PIN PLACEMENT (Map Click & Manual) ---
+        function setPin(lat, lon) {
+            selectedLat = lat;
+            selectedLon = lon;
+
+            // Remove old marker
+            if (marker) map.removeLayer(marker);
+
+            // Add new marker
+            marker = L.marker([lat, lon]).addTo(map);
+
+            // Show coordinates
+            const coordsDisplay = document.getElementById('coordsDisplay');
+            if (coordsDisplay) {
+                coordsDisplay.style.display = 'block';
+                document.getElementById('valLat').innerText = lat.toFixed(5);
+                document.getElementById('valLon').innerText = lon.toFixed(5);
+            }
+
+            // Enable Analyze button
+            const btnAnalyze = document.getElementById('btnAnalyze');
+            if (btnAnalyze) btnAnalyze.disabled = false;
+            
+            // Update status message
+            const locationStatus = document.getElementById('locationStatus');
+            if (locationStatus) {
+                locationStatus.innerHTML = `
+                    <i class="fa-solid fa-check-circle" style="color: #22c55e;"></i>
+                    <span style="color: #22c55e; font-size: 0.9rem;"> Location selected! Click "Analyze Solar Potential" to continue.</span>
+                `;
+                locationStatus.style.background = 'rgba(34, 197, 94, 0.1)';
+                locationStatus.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+            }
+        }
+
+        function autofillSampleAddress() {
+            document.getElementById('inpStreet').value = "123 Ayala Ave";
+            document.getElementById('inpCity').value = "Makati";
+            document.getElementById('inpProvince').value = "Metro Manila";
+            document.getElementById('inpCountry').value = "Philippines";
+            document.getElementById('inpZip').value = "1226";
+        }
+
+        function addApplianceRow() {
+            const table = document.getElementById('applianceTable');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+        <td><input type="text" class="address-input"></td>
+        <td><input type="number" class="address-input" style="width:80px;"></td>
+        <td><input type="number" class="address-input" style="width:80px;"></td>
+    `;
+            table.appendChild(row);
+        }
+    </script>
+</body>
+
+</html>

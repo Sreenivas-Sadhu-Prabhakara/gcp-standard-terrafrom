@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor | Apolaki</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Enhanced Font Visibility */
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+        }
+        
+        /* HIGH CONTRAST TEXT OVERRIDES */
+        body {
+            color: #ffffff !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        p, span, div, label {
+            color: #e2e8f0 !important;
+        }
+        
+        .subtitle {
+            color: #cbd5e1 !important;
+        }
+        
+        /* --- DASHBOARD SPECIFIC STYLES --- */
+
+        /* Layout overrides for Dashboard */
+        .app-card {
+            max-width: 1200px;
+            flex-direction: row;
+            background: var(--bg-card); /* Softer background for dashboard */
+            border: 1px solid var(--border-color);
+        }
+
+        /* SIDEBAR NAV */
+        .dash-sidebar {
+            flex: 0 0 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dash-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .dash-nav-item:hover, .dash-nav-item:focus { 
+            background: var(--bg-body); 
+            color: var(--text-main); 
+            outline: none;
+        }
+        .dash-nav-item.active {
+            background: var(--grad-action);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37,99,235,0.3);
+        }
+
+        /* MAIN DASHBOARD AREA */
+        .dash-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: none; /* Hidden by default, toggled via JS */
+            animation: fadeIn 0.4s ease-out;
+            color: var(--text-main);
+        }
+        .dash-content.active { display: block; }
+        
+        .dash-header h2 {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+        
+        .dash-header p {
+            color: var(--text-muted);
+        }
+
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+        /* WIDGETS (Cards) */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .widget-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .widget-card h3 {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .widget-val {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Energy Flow Animation Container */
+        .energy-flow-viz {
+            height: 200px;
+            background: #1E293B; /* Keep dark for contrast */
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            color: white;
+            position: relative;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .flow-node {
+            text-align: center;
+            z-index: 2;
+        }
+        .flow-icon {
+            width: 50px; height: 50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px auto;
+            font-size: 1.2rem;
+        }
+        
+        /* Animated Connecting Lines */
+        .flow-line {
+            position: absolute;
+            top: 40%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1;
+        }
+        .flow-dot {
+            position: absolute;
+            top: -4px;
+            width: 10px; height: 10px;
+            background: #4ADE80;
+            border-radius: 50%;
+            animation: flowMove 2s infinite linear;
+            box-shadow: 0 0 10px #4ADE80;
+        }
+        @keyframes flowMove { 0% { left: 0%; } 100% { left: 100%; } }
+
+        /* SERVICE PACKAGE CARDS */
+        .pkg-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .pkg-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .pkg-card:hover, .pkg-card:focus { 
+            transform: translateY(-5px); 
+            border-color: var(--color-primary); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); 
+            outline: none;
+        }
+        .pkg-card.featured { border: 2px solid var(--color-primary); position: relative; }
+        .pkg-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--grad-action); color: white;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        
+        .pkg-card h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .pkg-card .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-highlight);
+        }
+        
+        .pkg-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* SOLAR MOM PROFILE */
+        .mom-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 251, 235, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid #FCD34D;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+        .mom-profile h3 {
+            margin: 0 0 0.25rem 0;
+        }
+        .mom-profile p {
+            margin: 0;
+            color: var(--text-muted);
+        }
+        .mom-avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #F59E0B;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .status-ok { background: rgba(220, 252, 231, 0.2); color: #4ade80; border: 1px solid #4ade80; }
+        .status-warn { background: rgba(254, 243, 199, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
+
+        @media (max-width: 900px) {
+            .app-card { flex-direction: column; }
+            .dash-sidebar { flex-direction: row; overflow-x: auto; padding: 1rem; flex: none; }
+            .pkg-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header" role="banner">
+        <div class="header-inner">
+            <a href="../index.html" class="brand" aria-label="Apolaki Home">
+                <i class="fa-solid fa-sun fa-spin-pulse" style="--fa-animation-duration: 3s;" aria-hidden="true"></i> APOLAKI
+            </a>
+            <nav class="nav-pills" aria-label="Main Navigation">
+                <a href="../index.html" class="nav-pill"><i class="fa-solid fa-house" aria-hidden="true"></i> Home</a>
+                <a href="assessment.html" class="nav-pill"><i class="fa-solid fa-map" aria-hidden="true"></i> Assessment</a>
+                <a href="marketplace.html" class="nav-pill"><i class="fa-solid fa-shop" aria-hidden="true"></i> Marketplace</a>
+                <a href="finance.html" class="nav-pill"><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Finance</a>
+                <a href="contracts.html" class="nav-pill"><i class="fa-solid fa-file-contract" aria-hidden="true"></i> Contracts</a>
+                <a href="monitor.html" class="nav-pill active" aria-current="page"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Monitor</a>
+                <a href="credits.html" class="nav-pill"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Credits</a>
+                <a href="about.html" class="nav-pill"><i class="fa-solid fa-users" aria-hidden="true"></i> About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-stage" role="main">
+        <div class="app-card">
+            
+            <nav class="dash-sidebar" aria-label="Dashboard Navigation">
+                <button class="dash-nav-item active" onclick="switchTab('overview')" aria-current="page">
+                    <i class="fa-solid fa-table-columns" aria-hidden="true"></i> System Overview
+                </button>
+                <button class="dash-nav-item" onclick="switchTab('analytics')">
+                    <i class="fa-solid fa-chart-area" aria-hidden="true"></i> Production Analytics
+                </button>
+                <button class="dash-nav-item" onclick="switchTab('maintenance')">
+                    <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Maintenance
+                </button>
+            </nav>
+
+            <section id="view-overview" class="dash-content active">
+                <div class="dash-header">
+                    <h2>System Overview</h2>
+                    <p>Real-time data and insights about your solar energy system.</p>
+                </div>
+
+                <div class="energy-flow-viz">
+                    <div class="flow-line">
+                        <div class="flow-dot"></div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="flow-icon" style="color:#F59E0B;"><i class="fa-solid fa-sun"></i></div>
+                        <small>Solar</small><br><strong>4.2 kW</strong>
+                    </div>
+                    <div class="flow-node">
+                        <div class="flow-icon" style="color:#3B82F6;"><i class="fa-solid fa-house-chimney"></i></div>
+                        <small>Home</small><br><strong>2.1 kW</strong>
+                    </div>
+                    <div class="flow-node">
+                        <div class="flow-icon" style="color:#10B981;"><i class="fa-solid fa-battery-full"></i></div>
+                        <small>Battery</small><br><strong>98%</strong>
+                    </div>
+                    <div class="flow-node">
+                        <div class="flow-icon" style="color:#94A3B8;"><i class="fa-solid fa-tower-broadcast"></i></div>
+                        <small>Grid</small><br><strong>0 kW</strong>
+                    </div>
+                </div>
+
+                <div class="widget-grid">
+                    <div class="widget-card">
+                        <div style="color:#64748B; font-size:0.9rem;">Today's Generation</div>
+                        <div class="widget-val" style="font-weight:800; color:#0F172A;">24.5 kWh</div>
+                        <div style="color:#10B981; font-size:0.8rem;"><i class="fa-solid fa-arrow-up"></i> 12% vs avg</div>
+                    </div>
+                    <div class="widget-card">
+                        <div style="color:#64748B; font-size:0.9rem;">Total Savings (YTD)</div>
+                        <div class="widget-val" style="font-weight:800; color:#0F172A;">₱ 42,300</div>
+                        <div style="color:#F59E0B; font-size:0.8rem;">~ 3.5 tons CO2</div>
+                    </div>
+                    <div class="widget-card">
+                        <div style="color:#64748B; font-size:0.9rem;">Battery Health</div>
+                        <div class="widget-val" style="font-weight:800; color:#0F172A;">98%</div>
+                        <div style="color:#64748B; font-size:0.8rem;">Est. life: 9 Years</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-analytics" class="dash-content">
+                <div class="dash-header">
+                    <h2>Production Analytics</h2>
+                    <p>Detailed insights into your energy production and savings.</p>
+                </div>
+
+                <!-- Analytics content goes here -->
+                <div style="color:#64748B; font-size:1.2rem; text-align:center; padding:2rem;">
+                    <i class="fa-solid fa-chart-line fa-3x" style="margin-bottom:1rem;"></i>
+                    <p>Coming Soon: Advanced analytics and reporting features.</p>
+                </div>
+            </section>
+
+            <section id="view-maintenance" class="dash-content">
+                <div class="dash-header">
+                    <h2>Maintenance Hub</h2>
+                    <p>Book trusted "Solar Moms" from your local community for cleaning and checks.</p>
+                </div>
+
+                <div class="mom-profile">
+                    <div class="mom-avatar" style="background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; border: 3px solid #F59E0B;">
+                        <i class="fa-solid fa-user-tie fa-2x" style="color:var(--text-main)"></i>
+                    </div>
+                    
+                    <div style="flex:1;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <h3 style="margin:0;">Tita Baby's Solar Care</h3>
+                            <span class="status-pill status-ok">Available Now</span>
+                        </div>
+                        <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">
+                            <i class="fa-solid fa-location-dot"></i> 2km away • Verified "Solar Mom" since 2024
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top: 10px;">
+                            <span class="status-pill" style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);">4.9 <i class="fa-solid fa-star" style="color:#F59E0B"></i></span>
+                            <span class="status-pill" style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);">150 Jobs Done</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="btn btn-primary" onclick="alert('Booking Request Sent to Tita Baby!')">Book Cleaning (₱500)</button>
+                    </div>
+                </div>
+
+                <div class="widget-card">
+                    <h4 style="margin-top:0;">Service History</h4>
+                    <table style="width:100%; text-align:left; border-collapse:collapse; font-size:0.9rem; color:var(--text-main);">
+                        <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                            <th style="padding:10px;">Date</th>
+                            <th style="padding:10px;">Service</th>
+                            <th style="padding:10px;">Provider</th>
+                            <th style="padding:10px;">Status</th>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px;">Oct 12, 2025</td>
+                            <td style="padding:10px;">Panel Cleaning</td>
+                            <td style="padding:10px;">Mommy Glo</td>
+                            <td style="padding:10px;"><span class="status-pill status-ok">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;">Jun 05, 2025</td>
+                            <td style="padding:10px;">Inverter Check</td>
+                            <td style="padding:10px;">Apolaki Tech</td>
+                            <td style="padding:10px;"><span class="status-pill status-ok">Completed</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <section id="view-packages" class="dash-content">
+                <div style="text-align:center; margin-bottom:2rem;">
+                    <h1>Peace of Mind Packages</h1>
+                    <p class="subtitle">Annual plans to keep your system running at 100% efficiency.</p>
+                </div>
+
+                <div class="pkg-grid">
+                    <div class="pkg-card">
+                        <h3>Basic Care</h3>
+                        <div style="font-size:2rem; font-weight:800; margin:1rem 0;">₱ 2,500<span style="font-size:1rem; font-weight:400;">/yr</span></div>
+                        <ul style="text-align:left; color:#64748B; list-style:none; padding:0; line-height:2;">
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> 2x Panel Cleaning</li>
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> App Monitoring</li>
+                            <li style="opacity:0.5"><i class="fa-solid fa-xmark"></i> Priority Support</li>
+                        </ul>
+                        <button class="btn btn-ghost" style="width:100%; border:1px solid #e2e8f0; margin-top:1rem;">Select Basic</button>
+                    </div>
+
+                    <div class="pkg-card featured">
+                        <div class="pkg-badge">MOST POPULAR</div>
+                        <h3>Gold Standard</h3>
+                        <div style="font-size:2rem; font-weight:800; margin:1rem 0; color:var(--color-primary);">₱ 5,000<span style="font-size:1rem; font-weight:400;">/yr</span></div>
+                        <ul style="text-align:left; color:#64748B; list-style:none; padding:0; line-height:2;">
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> 4x Panel Cleaning</li>
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> 1x Technical Audit</li>
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> "Solar Mom" Priority</li>
+                        </ul>
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">Select Gold</button>
+                    </div>
+
+                    <div class="pkg-card">
+                        <h3>Platinum</h3>
+                        <div style="font-size:2rem; font-weight:800; margin:1rem 0;">₱ 9,000<span style="font-size:1rem; font-weight:400;">/yr</span></div>
+                        <ul style="text-align:left; color:#64748B; list-style:none; padding:0; line-height:2;">
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> Monthly Cleaning</li>
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> Full Insurance Coverage</li>
+                            <li><i class="fa-solid fa-check" style="color:#10B981"></i> 24/7 Hotline</li>
+                        </ul>
+                        <button class="btn btn-ghost" style="width:100%; border:1px solid #e2e8f0; margin-top:1rem;">Select Platinum</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        function switchTab(viewId) {
+            // Update Nav UI
+            document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector('.dash-nav-item[onclick*="' + viewId + '"]').classList.add('active');
+
+            // Switch Content
+            document.querySelectorAll('.dash-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

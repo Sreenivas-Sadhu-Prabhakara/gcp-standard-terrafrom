@@ -1,0 +1,170 @@
+{
+  "database": {
+    "provider": "mongodb",
+    "description": "Apolaki Solar Platform Database Configuration",
+    "collections": {
+      "users": {
+        "description": "User accounts and profiles",
+        "indexes": ["email", "createdAt"],
+        "schema": {
+          "email": "string (required, unique)",
+          "name": "string",
+          "passwordHash": "string",
+          "createdAt": "datetime",
+          "updatedAt": "datetime",
+          "profile": {
+            "location": "string",
+            "postalCode": "string",
+            "timezone": "string"
+          }
+        }
+      },
+      "solar_assessments": {
+        "description": "Solar potential assessments for locations",
+        "indexes": ["userId", "postalCode", "createdAt"],
+        "schema": {
+          "userId": "ObjectId (ref: users)",
+          "postalCode": "string",
+          "latitude": "number",
+          "longitude": "number",
+          "irradiance": "number",
+          "peakSunHours": "number",
+          "climateZone": "string",
+          "roofArea": "number",
+          "annualProduction": "number",
+          "systemSizeKw": "number",
+          "createdAt": "datetime"
+        }
+      },
+      "calculations": {
+        "description": "ROI calculation history",
+        "indexes": ["userId", "createdAt"],
+        "schema": {
+          "userId": "ObjectId (ref: users)",
+          "postalCode": "string",
+          "systemSizeKw": "number",
+          "electricityRate": "number",
+          "annualSavings": "number",
+          "paybackYears": "number",
+          "totalSavings25Year": "number",
+          "co2OffsetKg": "number",
+          "createdAt": "datetime"
+        }
+      },
+      "installations": {
+        "description": "Solar installation records",
+        "indexes": ["userId", "installerId", "status"],
+        "schema": {
+          "userId": "ObjectId (ref: users)",
+          "installerId": "ObjectId (ref: installers)",
+          "systemSizeKw": "number",
+          "panelCount": "number",
+          "inverterType": "string",
+          "batteryCapacity": "number",
+          "installationDate": "datetime",
+          "warrantyExpiry": "datetime",
+          "status": "string (pending, scheduled, completed, active)",
+          "totalCost": "number",
+          "createdAt": "datetime"
+        }
+      },
+      "installers": {
+        "description": "Verified solar installers/contractors",
+        "indexes": ["region", "rating", "verified"],
+        "schema": {
+          "companyName": "string",
+          "email": "string",
+          "phone": "string",
+          "address": "string",
+          "region": "string",
+          "certifications": "array[string]",
+          "rating": "number (1-5)",
+          "reviewCount": "number",
+          "verified": "boolean",
+          "createdAt": "datetime"
+        }
+      },
+      "energy_production": {
+        "description": "Real-time energy production data from monitoring",
+        "indexes": ["installationId", "timestamp"],
+        "schema": {
+          "installationId": "ObjectId (ref: installations)",
+          "timestamp": "datetime",
+          "productionKwh": "number",
+          "consumptionKwh": "number",
+          "gridExportKwh": "number",
+          "gridImportKwh": "number",
+          "batteryLevel": "number (0-100)"
+        }
+      },
+      "carbon_credits": {
+        "description": "Carbon credit transactions",
+        "indexes": ["userId", "status", "createdAt"],
+        "schema": {
+          "userId": "ObjectId (ref: users)",
+          "installationId": "ObjectId (ref: installations)",
+          "periodStart": "datetime",
+          "periodEnd": "datetime",
+          "co2OffsetKg": "number",
+          "creditsEarned": "number",
+          "creditValue": "number",
+          "status": "string (pending, verified, sold)",
+          "createdAt": "datetime"
+        }
+      }
+    },
+    "connection": {
+      "development": {
+        "uri": "mongodb://localhost:27017/apolaki_dev",
+        "options": {
+          "useNewUrlParser": true,
+          "useUnifiedTopology": true
+        }
+      },
+      "production": {
+        "uri_env_var": "MONGODB_URI",
+        "database_name": "apolaki_production",
+        "options": {
+          "useNewUrlParser": true,
+          "useUnifiedTopology": true,
+          "retryWrites": true,
+          "w": "majority"
+        }
+      }
+    }
+  },
+  "cache": {
+    "provider": "redis",
+    "description": "Caching layer for API responses and sessions",
+    "keys": {
+      "session:{userId}": "User session data (TTL: 24h)",
+      "calculation:{postalCode}:{systemSize}": "Cached ROI calculations (TTL: 1h)",
+      "nasa:{lat}:{lon}": "Cached NASA API responses (TTL: 24h)",
+      "installer:{region}": "Cached installer listings (TTL: 1h)"
+    },
+    "connection": {
+      "development": {
+        "host": "localhost",
+        "port": 6379
+      },
+      "production": {
+        "uri_env_var": "REDIS_URL"
+      }
+    }
+  },
+  "environment_variables": {
+    "required": [
+      "MONGODB_URI",
+      "NASA_API_KEY",
+      "GOOGLE_SOLAR_API_KEY"
+    ],
+    "optional": [
+      "REDIS_URL",
+      "OPENWEATHER_API_KEY",
+      "JWT_SECRET",
+      "SMTP_HOST",
+      "SMTP_USER",
+      "SMTP_PASS"
+    ]
+  }
+}

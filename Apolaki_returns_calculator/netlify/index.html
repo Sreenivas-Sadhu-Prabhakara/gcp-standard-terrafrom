@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apolaki - Intelligent Solar ROI Platform. Assess, finance, and monetize your solar energy journey worldwide.">
+    <meta name="theme-color" content="#38bdf8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Apolaki | Intelligent Solar Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+        }
+        body { color: #ffffff !important; }
+        h1, h2, h3, h4, h5, h6 { color: #ffffff !important; font-weight: 700 !important; }
+        p, span, label { color: #e2e8f0 !important; }
+        .subtitle { color: #cbd5e1 !important; }
+        .brand { font-weight: 900 !important; color: #38bdf8 !important; }
+        .nav-pill { font-weight: 600 !important; color: #e2e8f0 !important; }
+        .nav-pill:hover, .nav-pill.active { color: #ffffff !important; }
+        
+        .hero-section {
+            text-align: center;
+            padding: 4rem 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+        }
+        .hero-sub {
+            font-size: 1.25rem;
+            color: #ccc;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            .hero-sub { font-size: 1rem; margin-bottom: 2rem; }
+        }
+        .main-content { flex: 1; padding: 1rem; }
+        .calculator-form { margin: 2rem auto; }
+    </style>
+</head>
+<body>
+    <header class="app-header" role="banner">
+        <div class="header-inner">
+            <a href="index.html" class="brand" aria-label="Apolaki Home">
+                <i class="fa-solid fa-sun fa-spin-pulse" style="--fa-animation-duration: 3s;" aria-hidden="true"></i> APOLAKI
+            </a>
+            <nav class="nav-pills" aria-label="Main Navigation">
+                <a href="index.html" class="nav-pill active" aria-current="page"><i class="fa-solid fa-house" aria-hidden="true"></i> Home</a>
+                <a href="pages/assessment.html" class="nav-pill"><i class="fa-solid fa-map" aria-hidden="true"></i> Assessment</a>
+                <a href="pages/marketplace.html" class="nav-pill"><i class="fa-solid fa-shop" aria-hidden="true"></i> Marketplace</a>
+                <a href="pages/finance.html" class="nav-pill"><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Finance</a>
+                <a href="pages/contracts.html" class="nav-pill"><i class="fa-solid fa-file-contract" aria-hidden="true"></i> Contracts</a>
+                <a href="pages/monitor.html" class="nav-pill"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Monitor</a>
+                <a href="pages/credits.html" class="nav-pill"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Credits</a>
+                <a href="pages/about.html" class="nav-pill"><i class="fa-solid fa-users" aria-hidden="true"></i> About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content" role="main">
+        <section class="hero-section">
+            <h1 class="hero-title">Powering the Future <br>of Solar Homes.</h1>
+            <p class="hero-sub">The all-in-one platform to assess, finance, install, and monetize your solar energy journey worldwide.</p>
+        </section>
+
+        <!-- ROI Calculator Section -->
+        <div class="glass-container calculator-form">
+            <h2 style="text-align: center; color: #38bdf8; margin-top: 0;">Quick ROI Estimator</h2>
+            <form id="roiForm" onsubmit="event.preventDefault(); calculate();">
+                <div class="config-panel">
+                    <div class="input-group">
+                        <label for="zipcode">Postal Code</label>
+                        <input type="text" id="zipcode" placeholder="Enter Postal Code" value="1200" aria-label="Postal Code" required>
+                        <small style="color: #94a3b8; font-size: 0.8rem;">E.g., 1200 (PH), 10001 (US), SW1A 1AA (UK)</small>
+                    </div>
+                    <div class="input-group">
+                        <label for="kwSelect">System Size (kW)</label>
+                        <select id="kwSelect" aria-label="Solar System Size" required>
+                            <option value="3">3 kW System (~$8,250)</option>
+                            <option value="6">6 kW System (~$16,500)</option>
+                            <option value="10" selected>10 kW System (~$27,500)</option>
+                        </select>
+                    </div>
+                    <button id="calcBtn" type="submit" class="btn btn-primary" aria-label="Analyze ROI">
+                        <i class="fa-solid fa-bolt" aria-hidden="true"></i> Analyze ROI
+                    </button>
+                </div>
+            </form>
+
+            <section id="dashboard" class="dashboard hidden" aria-live="polite" aria-label="ROI Results">
+                <div class="card summary">
+                    <div>
+                        <h3>Payback Period</h3>
+                        <span class="big-stat" id="payback">--</span>
+                    </div>
+                    <div>
+                        <h3>Annual Savings</h3>
+                        <span class="big-stat" id="savings">--</span>
+                    </div>
+                </div>
+
+                <div class="card details">
+                    <h3>Monthly Generation Estimate</h3>
+                    <div style="height: 250px; display: flex; justify-content: center;">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card env-data">
+                    <h3>Solar Data</h3>
+                    <p>Peak Sun Hours: <strong id="irr">--</strong></p>
+                    <p>Climate Zone: <strong id="climate">--</strong></p>
+                    <p>25-Year Savings: <strong id="totalSavings">--</strong></p>
+                    <p>CO₂ Offset: <strong id="co2">--</strong> kg/year</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="feature-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 3rem auto; padding: 0 1rem;">
+            <a href="pages/assessment.html" class="feature-card" style="background: linear-gradient(145deg, #1e3a5f, #0f172a); border-radius: 16px; padding: 2rem; text-decoration: none; border: 1px solid #334155; transition: transform 0.3s, box-shadow 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🛰️</div>
+                <h3 style="color: #60a5fa; margin-bottom: 0.5rem;">Solar Assessment</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">NASA satellite data + Google Solar API for accurate potential analysis</p>
+            </a>
+            <a href="pages/marketplace.html" class="feature-card" style="background: linear-gradient(145deg, #1e3a5f, #0f172a); border-radius: 16px; padding: 2rem; text-decoration: none; border: 1px solid #334155; transition: transform 0.3s, box-shadow 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏪</div>
+                <h3 style="color: #60a5fa; margin-bottom: 0.5rem;">Marketplace</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Connect with verified installers and compare quotes</p>
+            </a>
+            <a href="pages/finance.html" class="feature-card" style="background: linear-gradient(145deg, #1e3a5f, #0f172a); border-radius: 16px; padding: 2rem; text-decoration: none; border: 1px solid #334155; transition: transform 0.3s, box-shadow 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">💰</div>
+                <h3 style="color: #60a5fa; margin-bottom: 0.5rem;">Finance Options</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Explore loans, leases, and incentive programs</p>
+            </a>
+            <a href="pages/monitor.html" class="feature-card" style="background: linear-gradient(145deg, #1e3a5f, #0f172a); border-radius: 16px; padding: 2rem; text-decoration: none; border: 1px solid #334155; transition: transform 0.3s, box-shadow 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+                <h3 style="color: #60a5fa; margin-bottom: 0.5rem;">Monitor System</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Real-time energy production tracking dashboard</p>
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; color: #64748b; border-top: 1px solid #334155;">
+        <p>© 2026 Apolaki Solar Platform. Empowering clean energy worldwide.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

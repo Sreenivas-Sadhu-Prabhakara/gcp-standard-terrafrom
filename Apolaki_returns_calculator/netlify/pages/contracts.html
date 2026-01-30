@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contracts | Apolaki</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Enhanced Font Visibility */
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+        }
+        
+        /* HIGH CONTRAST TEXT OVERRIDES */
+        body {
+            color: #ffffff !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        p, span, label {
+            color: #e2e8f0 !important;
+        }
+        
+        .subtitle {
+            color: #cbd5e1 !important;
+        }
+        
+        /* --- CONTRACTS SPECIFIC STYLES --- */
+        .app-card { max-width: 1200px; flex-direction: row; background: var(--bg-card); }
+        
+        .doc-sidebar {
+            flex: 0 0 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        .doc-nav-item {
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-muted); cursor: pointer;
+            font-weight: 600; display: flex; align-items: center; gap: 12px;
+            transition: 0.2s;
+            background: none; border: none; width: 100%; text-align: left; font-size: inherit;
+        }
+        .doc-nav-item.active {
+            background: var(--bg-body); color: var(--color-primary);
+            box-shadow: 0 2px 4px rgba(37,99,235,0.1);
+        }
+
+        /* DOC PREVIEW AREA */
+        .doc-stage { flex: 1; padding: 2rem; overflow-y: auto; }
+
+        .contract-paper {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            position: relative;
+        }
+        .contract-paper::before {
+            content: 'DRAFT';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 8rem; color: rgba(255,255,255,0.05); /* Adjusted for dark mode */
+            font-weight: 800; pointer-events: none;
+        }
+
+        /* PERMIT TIMELINE */
+        .permit-track { display: flex; flex-direction: column; gap: 0; }
+        .permit-step {
+            display: flex; gap: 1.5rem;
+            padding-bottom: 2rem;
+            position: relative;
+        }
+        .permit-step::before {
+            content: ''; position: absolute; left: 19px; top: 40px; bottom: 0;
+            width: 2px; background: var(--border-color);
+        }
+        .permit-step:last-child::before { display: none; }
+        
+        .step-icon {
+            width: 40px; height: 40px;
+            background: var(--bg-card); border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2; color: var(--text-muted);
+        }
+        .permit-step.completed .step-icon {
+            background: #10B981; border-color: #10B981; color: white;
+        }
+        .permit-step.active .step-icon {
+            border-color: var(--color-primary); color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
+        }
+
+        /* SIGNATURE BOX */
+        .sig-box {
+            border: 2px dashed var(--border-color);
+            background: var(--bg-input);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: var(--text-main);
+            width: 100%;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .sig-box:hover, .sig-box:focus { 
+            border-color: var(--color-primary); 
+            background: var(--bg-body); 
+            outline: none;
+        }
+
+        @media (max-width: 900px) {
+            .app-card { flex-direction: column; }
+            .doc-sidebar { flex-direction: row; overflow-x: auto; flex: none; }
+            .contract-paper { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-inner">
+            <a href="../index.html" class="brand" aria-label="Apolaki Home">
+                <i class="fa-solid fa-sun fa-spin-pulse" style="--fa-animation-duration: 3s; color: var(--color-primary);"></i> APOLAKI
+            </a>
+            <nav class="nav-pills" aria-label="Main Navigation">
+                <a href="../index.html" class="nav-pill"><i class="fa-solid fa-house" aria-hidden="true"></i> Home</a>
+                <a href="assessment.html" class="nav-pill"><i class="fa-solid fa-map" aria-hidden="true"></i> Assessment</a>
+                <a href="marketplace.html" class="nav-pill"><i class="fa-solid fa-shop" aria-hidden="true"></i> Marketplace</a>
+                <a href="finance.html" class="nav-pill"><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Finance</a>
+                <a href="contracts.html" class="nav-pill active" aria-current="page"><i class="fa-solid fa-file-contract" aria-hidden="true"></i> Contracts</a>
+                <a href="monitor.html" class="nav-pill"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Monitor</a>
+                <a href="credits.html" class="nav-pill"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Credits</a>
+                <a href="about.html" class="nav-pill"><i class="fa-solid fa-users" aria-hidden="true"></i> About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-stage">
+        <div class="app-card">
+            
+            <aside class="doc-sidebar">
+                <div style="font-size:0.8rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:1rem;">
+                    Legal Hub
+                </div>
+                <button class="doc-nav-item active" onclick="showSection('sign')" style="background: none; border: none; width: 100%; text-align: left; font-size: inherit;">
+                    <i class="fa-solid fa-file-signature"></i> Sign Contract
+                </button>
+                <button class="doc-nav-item" onclick="showSection('permits')" style="background: none; border: none; width: 100%; text-align: left; font-size: inherit;">
+                    <i class="fa-solid fa-stamp"></i> Permit Tracker
+                </button>
+                <button class="doc-nav-item" onclick="showSection('vault')" style="background: none; border: none; width: 100%; text-align: left; font-size: inherit;">
+                    <i class="fa-solid fa-folder-open"></i> The Vault
+                </button>
+            </aside>
+
+            <section id="sec-sign" class="doc-stage">
+                <div style="background:#ECFDF5; border:1px solid #10B981; padding:1rem; border-radius:12px; margin-bottom:2rem; display:flex; align-items:center; gap:1rem;">
+                    <i class="fa-solid fa-circle-check" style="color:#10B981; font-size:1.5rem;"></i>
+                    <div>
+                        <strong style="color:#065F46;">Deal Configuration Loaded</strong>
+                        <div style="font-size:0.9rem; color:#047857;">Your quote from the Finance module has been converted into this legal draft.</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h1>Installation Agreement</h1>
+                    <button class="btn btn-ghost"><i class="fa-solid fa-download"></i> Download PDF</button>
+                </div>
+
+                <div class="contract-paper">
+                    <div style="text-align:center; margin-bottom:2rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+                        <i class="fa-solid fa-sun fa-2x" style="color:#F59E0B"></i>
+                        <h3>SOLAR POWER PURCHASE & INSTALLATION AGREEMENT</h3>
+                        <p style="color:#64748B; font-size:0.9rem;" id="contractRef">Ref: GEN-...</p>
+                    </div>
+                    
+                    <div id="contractBody" style="line-height: 1.8; color:#334155;">
+                        <p>Loading contract details...</p>
+                    </div>
+                    
+                    <div style="margin-top:3rem;">
+                        <span id="lblDigitalSignature" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-weight: 600;">Digital Signature</span>
+                        <button class="sig-box" id="sigPad" onclick="signContract()" style="width: 100%; font: inherit; color: inherit; display: block;" aria-labelledby="lblDigitalSignature">
+                            <i class="fa-solid fa-pen-nib fa-2x" style="color:var(--text-muted); margin-bottom:10px;" aria-hidden="true"></i>
+                            <div>Click here to E-Sign</div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-permits" class="doc-stage" style="display:none;">
+                <h1>Permit Status</h1>
+                <p class="subtitle">Real-time tracking of government compliance.</p>
+                <div class="permit-track">
+                    <div class="permit-step completed">
+                        <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                        <div><strong>Barangay Clearance</strong><div style="color:#64748B; font-size:0.9rem;">Approved: Oct 10, 2025</div></div>
+                    </div>
+                    <div class="permit-step active">
+                        <div class="step-icon"><i class="fa-solid fa-helmet-safety"></i></div>
+                        <div><strong>Building Permit (LGU)</strong><div style="color:#F59E0B; font-size:0.9rem;">In Progress</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-vault" class="doc-stage" style="display:none;">
+                <h1>The Vault</h1>
+                <p class="subtitle">Secure storage for documentation.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:1rem;">
+                    <div style="background:white; border:1px solid #E2E8F0; padding:1.5rem; border-radius:12px; text-align:center;">
+                        <i class="fa-solid fa-file-pdf fa-3x" style="color:#EF4444;"></i>
+                        <div style="font-weight:700; margin-top:10px;">Draft_Agreement.pdf</div>
+                        <button class="btn btn-ghost" style="width:100%; margin-top:10px;">View</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // --- 1. TAB NAVIGATION ---
+        function showSection(id) {
+            document.querySelectorAll('.doc-stage').forEach(el => el.style.display = 'none');
+            document.getElementById('sec-' + id).style.display = 'block';
+            document.querySelectorAll('.doc-nav-item').forEach(el => el.classList.remove('active'));
+            // Check if event exists (it might be called manually)
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                 // Fallback for manual calls, though less robust without ID
+                 // For now, simpler is okay as this is mostly UI
+            }
+        }
+
+        // --- 2. DYNAMIC CONTRACT GENERATION ---
+        window.onload = function() {
+            // Retrieve data from Finance Module
+            const savedDeal = localStorage.getItem('apolaki_deal');
+            
+            if(savedDeal) {
+                const deal = JSON.parse(savedDeal);
+                
+                // Construct the dynamic text
+                const refNum = "APOLAKI-" + new Date().getFullYear() + "-" + Math.floor(Math.random() * 10000);
+                document.getElementById('contractRef').innerText = "Ref: " + refNum;
+
+                // Battery Text Logic
+                let batteryText = "Grid-Tied System (No Battery)";
+                if(deal.battery) batteryText = "Hybrid System with 5kWh Lithium-Ion Battery Storage";
+
+                // Payment Text Logic
+                let paymentText = "Full Cash Payment of ₱" + deal.total.toLocaleString();
+                if(deal.payment === 'loan') paymentText = "Bank Financing (20% Downpayment: ₱" + (deal.total*0.2).toLocaleString() + ")";
+
+                // Inject HTML
+                const htmlContent = `
+                    <p><strong>1. PARTIES:</strong> This agreement is made between <strong>Juan Dela Cruz</strong> (Client) and <strong>Apolaki Accredited Installer</strong> (Provider).</p>
+                    
+                    <p><strong>2. SCOPE OF WORK:</strong><br>
+                    The Provider agrees to install a <strong>${deal.size} kWp</strong> Solar PV System.<br>
+                    System Configuration: <strong>${batteryText}</strong>.<br>
+                    Location: [Makati City, Metro Manila].</p>
+
+                    <p><strong>3. FINANCIAL TERMS:</strong><br>
+                    Total Contract Price: <strong>₱ ${deal.total.toLocaleString()}</strong>.<br>
+                    Payment Method: <strong>${paymentText}</strong>.<br>
+                    <em>Price includes hardware, installation labor, and local permitting fees.</em></p>
+
+                    <p><strong>4. WARRANTY:</strong><br>
+                    - PV Panels: 25 Years Linear Performance Warranty<br>
+                    - Inverter: 10 Years Manufacturer Warranty<br>
+                    - Workmanship: 2 Years Service Warranty</p>
+                `;
+
+                document.getElementById('contractBody').innerHTML = htmlContent;
+
+            } else {
+                // Fallback if they skipped Finance
+                document.getElementById('contractBody').innerHTML = "<p style='color:red'>No quote detected. Please go back to the Finance module to configure your system.</p>";
+            }
+        }
+
+        // --- 3. SIGNATURE INTERACTION ---
+        function signContract() {
+            const pad = document.getElementById('sigPad');
+            pad.style.background = 'rgba(16, 185, 129, 0.2)';
+            pad.style.borderColor = '#10B981';
+            pad.style.color = '#10B981';
+            pad.innerHTML = `
+                <i class='fa-solid fa-file-contract fa-2x' style='margin-bottom:10px;' aria-hidden="true"></i>
+                <div style='font-weight:bold;'>Signed Digitally by Juan Dela Cruz</div>
+                <small>Timestamp: ${new Date().toLocaleString()}</small>
+            `;
+            
+            // Optional: Alert next step
+            setTimeout(() => {
+                alert("Contract Signed! Proceeding to Permit Tracker.");
+                // Update UI to show permit tracker
+                const permitTab = document.querySelectorAll('.doc-nav-item')[1];
+                if(permitTab) {
+                    permitTab.click();
+                    permitTab.focus();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
